@@ -1,0 +1,43 @@
+name: Ora AI Launch
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. جلب الكود من المستودع إلى السيرفر
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. تثبيت Java (هذا هو الإصلاح للمشكلة السابقة)
+      # ضروري جداً لأن أدوات Android تعتمد عليه
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3. تثبيت بيئة Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 4. تنزيل المكتبات المستخدمة في تطبيقك
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 5. أمر بناء ملف APK (النسخة النهائية)
+      - name: Build APK
+        run: flutter build apk --release
+
+      # 6. رفع ملف APK الناتج لكي تتمكن من تحميله
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
